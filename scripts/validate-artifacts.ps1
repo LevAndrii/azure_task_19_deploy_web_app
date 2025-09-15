@@ -11,7 +11,7 @@ $artifactsConfigPath = "$PWD/artifacts.json"
 $resourcesTemplateName = "exported-template.json"
 $tempFolderPath = "$PWD/temp"
 
-if ($DownloadArtifacts) { 
+if ($DownloadArtifacts) {
     Write-Output "Reading config"
     $artifactsConfig = Get-Content -Path $artifactsConfigPath | ConvertFrom-Json 
 
@@ -49,7 +49,7 @@ if ($acr ) {
 
 $registryName = $acr.name.Replace("[parameters('registries_", "").Replace("_name')]", "")
 Write-Output "Registry name: $registryName"
-$imageName = "$($registryName).azurecr.io/todoapp"
+$imageName = "$($registryName).azurecr.io/todoapp:v1"
 Write-Output "Expected docker image name: $imageName"
 
 if ($acr.sku.name -eq 'Basic') { 
@@ -99,7 +99,8 @@ if ($webApp.kind.Contains('container')) {
     throw "Unable to validate the web app type. Please make sure that Web App type is set to 'Container' (for that, recreate the web app) and try again."
 }
 
-if ($webApp.properties.siteConfig.linuxFxVersion.Contains($imageName)) { 
+$expectedLinuxFx = "DOCKER|$imageName"
+if ($webApp.properties.siteConfig.linuxFxVersion -eq $expectedLinuxFx) {
     Write-Output "`u{2705} Checked if the Web App is using docker image, published to the task ACR - OK."
 } else { 
     Write-Output `u{1F914}
