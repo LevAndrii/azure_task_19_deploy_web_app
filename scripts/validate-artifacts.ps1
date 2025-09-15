@@ -92,7 +92,7 @@ if ($webApp ) {
     throw "Unable to find the Web App resource. Please make sure that you created the Web App in the task resource group and try agian."
 }
 
-if ($webApp.kind.Contains('container')) { 
+if ($webApp.kind.Contains('container')) {
     Write-Output "`u{2705} Checked if the Web App has a type 'container' - OK."
 } else { 
     Write-Output `u{1F914}
@@ -108,3 +108,11 @@ if ($webApp.properties.siteConfig.linuxFxVersion.Contains($imageName)) {
 
 Write-Output ""
 Write-Output "`u{1F973} Congratulations! All tests passed!"
+$result = @{
+    task = "task19"
+    status = "passed"
+    timestamp = (Get-Date).ToString("yyyy-MM-ddTHH:mm:ss")
+}
+
+$result | ConvertTo-Json | Set-Content -Path "$PWD/results.json"
+Write-Output "Created results.json with test results."
