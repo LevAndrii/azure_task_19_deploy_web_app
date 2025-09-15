@@ -12,7 +12,7 @@ $resourcesTemplateName = "exported-template.json"
 $tempFolderPath = "$PWD/temp"
 
 if ($DownloadArtifacts) { 
-    Write-Output "Reading config" 
+    Write-Output "Reading config"
     $artifactsConfig = Get-Content -Path $artifactsConfigPath | ConvertFrom-Json 
 
     Write-Output "Checking if temp folder exists"
@@ -23,10 +23,10 @@ if ($DownloadArtifacts) {
 
     Write-Output "Downloading artifacts"
 
-    if (-not $artifactsConfig.resourcesTemplate) { 
+    if (-not $artifactsConfig.resourcesTemplate) {
         throw "Artifact config value 'resourcesTemplate' is empty! Please make sure that you executed the script 'scripts/generate-artifacts.ps1', and commited your changes"
-    } 
-    Invoke-WebRequest -Uri $artifactsConfig.resourcesTemplate -OutFile "$tempFolderPath/$resourcesTemplateName" -UseBasicParsing
+    }
+    Invoke-WebRequest -Uri $artifactsConfig.resourcesTemplate -OutFile "$tempFolderPath/$resourcesTemplateName"
 
 }
 
@@ -36,9 +36,9 @@ $TemplateObject = ConvertFrom-Json $TemplateFileText -AsHashtable
 
 $acr = ( $TemplateObject.resources | Where-Object -Property type -EQ "Microsoft.ContainerRegistry/registries" )
 if ($acr ) {
-    if ($acr.name.Count -eq 1) { 
+    if (@($acr).Count -eq 1) {
         Write-Output "`u{2705} Checked if Azure Container Registry resource exists - OK."
-    }  else { 
+    }  elseif (@($acr).Count -gt 1) {
         Write-Output `u{1F914}
         throw "More than one Azure Container Registry resource was found in the task resource group. Please make sure you have only one ACR resource, and try again."
     }
@@ -61,9 +61,9 @@ if ($acr.sku.name -eq 'Basic') {
 
 $asp = ( $TemplateObject.resources | Where-Object -Property type -EQ "Microsoft.Web/serverfarms" )
 if ($asp ) {
-    if ($acr.name.Count -eq 1) { 
+    if (@($asp).Count -eq 1) {
         Write-Output "`u{2705} Checked if App Service Plan for the Web App exists - OK."
-    }  else { 
+    }  elseif (@($asp).Count -gt 1) {
         Write-Output `u{1F914}
         throw "More than one App Service Plan resource was found in the task resource group. App service plan is created automatically with the Web App - please clean-up un-used app service plans and try again."
     }
@@ -72,7 +72,7 @@ if ($asp ) {
     throw "Unable to find App Service Plan resource. Please make sure that you created the Web App in the task resource group and try agian."
 }
 
-if ($asp.sku.name -eq 'F1') { 
+if ($asp.sku.name -eq 'F1') {
     Write-Output "`u{2705} Checked the Web App SKU - OK."
 } else { 
     Write-Output `u{1F914}
@@ -81,9 +81,9 @@ if ($asp.sku.name -eq 'F1') {
 
 $webApp = ( $TemplateObject.resources | Where-Object -Property type -EQ "Microsoft.Web/sites" )
 if ($webApp ) {
-    if ($acr.name.Count -eq 1) { 
+    if (@($webApp).Count -eq 1) {
         Write-Output "`u{2705} Checked if the Web App exists - OK."
-    }  else { 
+    }  elseif (@($webApp).Count -gt 1) {
         Write-Output `u{1F914}
         throw "More than one Web App resource was found in the task resource group. Please make sure that you have only one web app in the task resource group and try again."
     }
@@ -114,5 +114,5 @@ $result = @{
     timestamp = (Get-Date).ToString("yyyy-MM-ddTHH:mm:ss")
 }
 
-$result | ConvertTo-Json | Set-Content -Path "$PWD/results.json"
-Write-Output "Created results.json with test results."
+$result | ConvertTo-Json | Set-Content -Path "$PWD/result.json"
+Write-Output "Created result.json with test results."
